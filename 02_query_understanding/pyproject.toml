@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "02-query-understanding"
+version = "0.1.0"
+description = ""
+package-mode = false
+authors = ["NirantK <nirant.bits@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11, <4.0"
+ruff = "^0.6.5"
+instructor = "^1.4.2"
+openai = "^1.45.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
