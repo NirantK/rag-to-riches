@@ -16,6 +16,7 @@ python-dotenv = "^1.0.1"
 fastembed = "^0.3.6"
 pyarrow = "^17.0.0"
 scikit-learn = "^1.5.2"
+mermaid-python = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.6"
