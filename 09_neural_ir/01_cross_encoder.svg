@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <!-- Query tokens -->
+  <rect x="50" y="50" width="50" height="50" fill="#FFA07A" />
+  <rect x="110" y="50" width="50" height="50" fill="#FFA07A" />
+  <rect x="170" y="50" width="50" height="50" fill="#FFA07A" />
+  <text x="75" y="80" font-size="14" text-anchor="middle" fill="black">Q1</text>
+  <text x="135" y="80" font-size="14" text-anchor="middle" fill="black">Q2</text>
+  <text x="195" y="80" font-size="14" text-anchor="middle" fill="black">Q3</text>
+
+  <!-- Document tokens -->
+  <rect x="230" y="50" width="50" height="50" fill="#FF8C00" />
+  <rect x="290" y="50" width="50" height="50" fill="#FF8C00" />
+  <rect x="350" y="50" width="50" height="50" fill="#FF8C00" />
+  <rect x="410" y="50" width="50" height="50" fill="#FF8C00" />
+  <text x="255" y="80" font-size="14" text-anchor="middle" fill="black">D1</text>
+  <text x="315" y="80" font-size="14" text-anchor="middle" fill="black">D2</text>
+  <text x="375" y="80" font-size="14" text-anchor="middle" fill="black">D3</text>
+  <text x="435" y="80" font-size="14" text-anchor="middle" fill="black">D4</text>
+
+  <!-- Self-attention layers -->
+  <rect x="50" y="150" width="410" height="130" fill="#FFE0B2" rx="5" ry="5" />
+  <text x="255" y="215" font-size="18" text-anchor="middle" fill="#E65100">Jointly Trained</text>
+  <text x="255" y="245" font-size="18" text-anchor="middle" fill="#E65100">Transformer Layers</text>
+
+  <!-- Connections between tokens and self-attention layers -->
+  <line x1="75" y1="100" x2="75" y2="150" stroke="#D2691E" stroke-width="1" />
+  <line x1="135" y1="100" x2="135" y2="150" stroke="#D2691E" stroke-width="1" />
+  <line x1="195" y1="100" x2="195" y2="150" stroke="#D2691E" stroke-width="1" />
+  <line x1="255" y1="100" x2="255" y2="150" stroke="#D2691E" stroke-width="1" />
+  <line x1="315" y1="100" x2="315" y2="150" stroke="#D2691E" stroke-width="1" />
+  <line x1="375" y1="100" x2="375" y2="150" stroke="#D2691E" stroke-width="1" />
+  <line x1="435" y1="100" x2="435" y2="150" stroke="#D2691E" stroke-width="1" />
+
+  <!-- CLS token -->
+  <rect x="50" y="290" width="50" height="50" fill="#FF4500" />
+  <text x="75" y="320" font-size="14" text-anchor="middle" fill="white">[CLS]</text>
+
+  <!-- Connection from self-attention to CLS -->
+  <line x1="75" y1="280" x2="75" y2="290" stroke="#D2691E" stroke-width="2" />
+
+  <!-- Dense layer -->
+  <rect x="150" y="290" width="100" height="50" fill="#FF7F50" rx="5" ry="5" />
+  <text x="200" y="320" font-size="14" text-anchor="middle" fill="black">Dense Layer</text>
+
+  <!-- Connection from CLS to dense layer -->
+  <line x1="100" y1="315" x2="150" y2="315" stroke="#D2691E" stroke-width="2" marker-end="url(#arrowhead)" />
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#D2691E" />
+    </marker>
+  </defs>
+
+  <!-- Output -->
+  <rect x="300" y="290" width="150" height="50" fill="#FF6347" rx="5" ry="5" />
+  <text x="375" y="320" font-size="14" text-anchor="middle" fill="white">Similarity Score</text>
+
+  <!-- Connection from dense to output -->
+  <line x1="250" y1="315" x2="300" y2="315" stroke="#D2691E" stroke-width="2" marker-end="url(#arrowhead)" />
+
+  <!-- Legend -->
+  <rect x="500" y="50" width="20" height="20" fill="#FFA07A" />
+  <text x="530" y="65" font-size="14" dominant-baseline="middle" fill="black">Query Tokens</text>
+  
+  <rect x="500" y="80" width="20" height="20" fill="#FF8C00" />
+  <text x="530" y="95" font-size="14" dominant-baseline="middle" fill="black">Document Tokens</text>
+  
+  <rect x="500" y="110" width="20" height="20" fill="#FF4500" />
+  <text x="530" y="125" font-size="14" dominant-baseline="middle" fill="black">CLS Token</text>
+</svg>

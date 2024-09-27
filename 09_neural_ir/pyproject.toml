@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "09-neural-ir"
+version = "0.1.0"
+description = ""
+authors = ["NirantK <nirant.bits@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9, <=3.12"
+fastembed = "^0.3.6"
+jupyter = "^1.1.1"
+ruff = "^0.6.8"
+sentence-transformers = "^3.1.1"
+datasets = "^3.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
