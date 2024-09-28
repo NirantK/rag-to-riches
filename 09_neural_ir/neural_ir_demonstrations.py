@@ -140,15 +140,15 @@ class ColBERTInteraction:
         self.query_index = query_index
         self.doc_index = doc_index
 
-    def display_interaction(self, display_max_scores: bool = True, display_total_score: bool = True):
+    def display_interaction(self, display_token_scores: bool = True, display_max_scores: bool = True, display_total_score: bool = True):
         query = queries[self.query_index]
         query_embedding = colbert_query_embeddings[self.query_index]
         document_embedding = np.array(colbert_document_embeddings)
         scores = compute_relevance_scores(query_embedding, document_embedding)
-
-        console.print(f"Query Embedding Shape: {query_embedding.shape}")
-        console.print(f"Document Embedding Shape: {document_embedding.shape}")
-        console.print(f"Scores Shape: {scores.shape}")
+        if display_token_scores:
+            console.print(f"Query Embedding Shape: {query_embedding.shape}")
+            console.print(f"Document Embedding Shape: {document_embedding.shape}")
+            console.print(f"Scores Shape: {scores.shape}")
 
         # Get the tokenizer for ColBERT
         colbert_tokenizer = Tokenizer.from_pretrained("colbert-ir/colbertv2.0")
@@ -158,9 +158,9 @@ class ColBERTInteraction:
         document_tokens_ids = colbert_tokenizer.encode(document).ids 
         string_query_tokens = [colbert_tokenizer.decode([token_id]) for token_id in query_token_ids]
         string_document_tokens = [colbert_tokenizer.decode([token_id]) for token_id in document_tokens_ids]
-
-        console.print(f"Query Tokens: {string_query_tokens}")
-        console.print(f"Document Tokens: {string_document_tokens}")
+        if display_token_scores:
+            console.print(f"Query Tokens: {string_query_tokens}")
+            console.print(f"Document Tokens: {string_document_tokens}")
 
         # Create a mapping of scores to query, document token pair
         score_token_mapping = []
@@ -174,13 +174,14 @@ class ColBERTInteraction:
 
         # console.print(f"Score Token Mapping: {score_token_mapping}")
         # Print as table
-        score_table = Table(title="Score Token Mapping")
-        score_table.add_column("Query Token", style="cyan")
-        score_table.add_column("Document Token", style="magenta")
-        score_table.add_column("Score", style="green")
-        for mapping in score_token_mapping:
-            score_table.add_row(mapping['query_token'], mapping['document_token'], f"{mapping['score']:.2f}")
-        console.print(score_table)
+        if display_token_scores:
+            score_table = Table(title="Score Token Mapping")
+            score_table.add_column("Query Token", style="cyan")
+            score_table.add_column("Document Token", style="magenta")
+            score_table.add_column("Score", style="green")
+            for mapping in score_token_mapping:
+                score_table.add_row(mapping['query_token'], mapping['document_token'], f"{mapping['score']:.2f}")
+            console.print(score_table)
 
         max_scores_per_query_term = np.max(scores, axis=2)
 
@@ -196,9 +197,8 @@ class ColBERTInteraction:
                 max_score_table.add_row(q_token, documents[self.doc_index], f"{max_score:.2f}")
 
             console.print(max_score_table)
-        
+        total_score = np.sum(scores[self.doc_index])
         if display_total_score:
-            total_score = np.sum(scores[self.doc_index])
             # Create a panel for the total score
             total_score_panel = Panel(
                 f"Query: {query}\nDocument: {documents[self.doc_index]}\nTotal Score: {total_score:.4f}",
@@ -240,42 +240,6 @@ def demonstrate_cross_encoder(queries, documents):
 
 # display_token_representations(documents=documents, queries=queries)
 
-
-
-def dense_relevance_order(documents, queries, k=3):
-    dense_document_embeddings = generate_embeddings(dense_embedding_model, documents)
-    dense_query_embeddings = generate_embeddings(dense_embedding_model, queries)
-
-    scores = np.matmul(
-        dense_query_embeddings, dense_document_embeddings.transpose(0, 2, 1)
-    )
-    sorted_indices = np.argsort(scores, axis=1)[:, ::-1][:, :k]
-
-    for query_index, query in enumerate(queries):
-        print(f"Query: {query}")
-        for rank, doc_index in enumerate(sorted_indices):
-            print(f"Rank {rank}: {documents[doc_index]}")
-        print()
-    return sorted_indices
-
-
-def sparse_relevance_order(documents, queries, k=3):
-    sparse_document_embeddings = generate_embeddings(sparse_model, documents)
-    sparse_query_embeddings = generate_embeddings(sparse_model, queries)
-
-    # Use dot product for scoring
-    scores = np.dot(
-        sparse_query_embeddings, sparse_document_embeddings.transpose(0, 2, 1)
-    )
-    sorted_indices = np.argsort(scores, axis=1)[:, ::-1][:, :k]
-
-    for query_index, query in enumerate(queries):
-        print(f"Query: {query}")
-        for rank, doc_index in enumerate(sorted_indices):
-            print(f"Rank {rank}: {documents[doc_index]}")
-        print()
-    return sorted_indices
-
 ########################################################
 # Sparse Interaction
 ########################################################
@@ -305,7 +269,7 @@ for i in range(len(documents)):
 sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
 
 # Create a table to display the sorted scores
-score_table = Table(title="Sorted Total Scores")
+score_table = Table(title="Sorted Sparse Total Scores")
 score_table.add_column("Document", style="cyan")
 score_table.add_column("Query", style="magenta")
 score_table.add_column("Total Score", style="green")
@@ -325,67 +289,66 @@ console.print(score_table)
 # Dense Interaction
 ########################################################
 
-# total_scores = []
-# for i in range(len(documents)):
-#     for j in range(len(queries)):
-#         similarity_score  = np.dot(dense_query_embeddings[j], dense_document_embeddings[i])
-#         total_scores.append({
-#             'document': documents[i],
-#             'query': queries[j],
-#             'total_score': similarity_score
-#         })
+total_scores = []
+for i in range(len(documents)):
+    for j in range(len(queries)):
+        similarity_score  = np.dot(dense_query_embeddings[j], dense_document_embeddings[i])
+        total_scores.append({
+            'document': documents[i],
+            'query': queries[j],
+            'total_score': similarity_score
+        })
 
-# # Sort total_scores by 'total_score' in descending order
-# sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
+# Sort total_scores by 'total_score' in descending order
+sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
 
-# # Create a table to display the sorted scores
-# score_table = Table(title="Sorted Total Scores")
-# score_table.add_column("Document", style="cyan")
-# score_table.add_column("Query", style="magenta")
-# score_table.add_column("Total Score", style="green")
-# # Add rows to the table
-# for score in sorted_scores:
-#     score_table.add_row(
-#         score['document'],
-#         score['query'],
-#         f"{score['total_score']:.4f}"
-#     )
+# Create a table to display the sorted scores
+score_table = Table(title="Sorted Dense Total Scores")
+score_table.add_column("Document", style="cyan")
+score_table.add_column("Query", style="magenta")
+score_table.add_column("Total Score", style="green")
+# Add rows to the table
+for score in sorted_scores:
+    score_table.add_row(
+        score['document'],
+        score['query'],
+        f"{score['total_score']:.4f}"
+    )
 
-# # Print the table
-# console.print(score_table)
+# Print the table
+console.print(score_table)
 
 ########################################################
 # ColBERT Interaction
 ########################################################
 
-# total_scores = []
-# for i in range(len(documents)):
-#     for j in range(len(queries)):
-#         print(f"Document: {documents[i]}, Query: {queries[j]}")
-#         late_interaction = ColBERTInteraction(doc_index=i, query_index=j)
-#         total_score = late_interaction.display_interaction(display_max_scores=False, display_total_score=True)
-#         total_scores.append({
-#             'document': documents[i],
-#             'query': queries[j],
-#             'total_score': total_score
-#         })
+total_scores = []
+for i in range(len(documents)):
+    for j in range(len(queries)):
+        late_interaction = ColBERTInteraction(doc_index=i, query_index=j)
+        total_score = late_interaction.display_interaction(display_token_scores=False, display_max_scores=False, display_total_score=False)
+        total_scores.append({
+            'document': documents[i],
+            'query': queries[j],
+            'total_score': total_score
+        })
 
-# # Sort total_scores by 'total_score' in descending order
-# sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
+# Sort total_scores by 'total_score' in descending order
+sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
 
-# # Create a table to display the sorted scores
-# score_table = Table(title="Sorted Total Scores")
-# score_table.add_column("Document", style="cyan")
-# score_table.add_column("Query", style="magenta")
-# score_table.add_column("Total Score", style="green")
+# Create a table to display the sorted scores
+score_table = Table(title="Sorted Colbert Total Scores")
+score_table.add_column("Document", style="cyan")
+score_table.add_column("Query", style="magenta")
+score_table.add_column("Total Score", style="green")
 
-# # Add rows to the table
-# for score in sorted_scores:
-#     score_table.add_row(
-#         score['document'],
-#         score['query'],
-#         f"{score['total_score']:.4f}"
-#     )
+# Add rows to the table
+for score in sorted_scores:
+    score_table.add_row(
+        score['document'],
+        score['query'],
+        f"{score['total_score']:.4f}"
+    )
 
-# # Print the table
-# console.print(score_table)
+# Print the table
+console.print(score_table)
