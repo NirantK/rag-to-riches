@@ -238,52 +238,6 @@ def demonstrate_cross_encoder(queries, documents):
 # print_embedding_info("Dense", dense_document_embeddings, dense_query_embeddings)
 # print_embedding_info("Sparse", sparse_document_embeddings, sparse_query_embeddings)
 
-# display_token_representations(documents=documents, queries=queries)
-
-########################################################
-# Sparse Interaction
-########################################################
-
-total_scores = []
-for i in range(len(documents)):
-    for j in range(len(queries)):
-        query_indices, query_weights = sparse_document_embeddings[i].indices, sparse_document_embeddings[i].values
-        document_indices, document_weights = sparse_query_embeddings[j].indices, sparse_query_embeddings[j].values
-        
-        # Find all indices that are in both query_indices and document_indices  
-        common_indices = set(query_indices) & set(document_indices)
-        similarity_score = 0
-        for index in common_indices:
-            # Get the weight of the token in the query and document using lookup and then multiply them
-            query_weight = query_weights[np.where(query_indices == index)[0][0]]
-            document_weight = document_weights[np.where(document_indices == index)[0][0]]
-            similarity_score  += query_weight * document_weight
-        
-        total_scores.append({
-            'document': documents[i],
-            'query': queries[j],
-            'total_score': similarity_score
-        })
-
-# Sort total_scores by 'total_score' in descending order
-sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
-
-# Create a table to display the sorted scores
-score_table = Table(title="Sorted Sparse Total Scores")
-score_table.add_column("Document", style="cyan")
-score_table.add_column("Query", style="magenta")
-score_table.add_column("Total Score", style="green")
-
-# Add rows to the table
-for score in sorted_scores:
-    score_table.add_row(
-        score['document'],
-        score['query'],
-        f"{score['total_score']:.4f}"
-    )
-
-# Print the table
-console.print(score_table)
 
 ########################################################
 # Dense Interaction
@@ -338,6 +292,53 @@ sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=Tru
 
 # Create a table to display the sorted scores
 score_table = Table(title="Sorted Colbert Total Scores")
+score_table.add_column("Document", style="cyan")
+score_table.add_column("Query", style="magenta")
+score_table.add_column("Total Score", style="green")
+
+# Add rows to the table
+for score in sorted_scores:
+    score_table.add_row(
+        score['document'],
+        score['query'],
+        f"{score['total_score']:.4f}"
+    )
+
+# Print the table
+console.print(score_table)
+
+########################################################
+# Sparse Interaction
+########################################################
+
+# display_token_representations(documents=documents, queries=queries)
+
+total_scores = []
+for i in range(len(documents)):
+    for j in range(len(queries)):
+        query_indices, query_weights = sparse_document_embeddings[i].indices, sparse_document_embeddings[i].values
+        document_indices, document_weights = sparse_query_embeddings[j].indices, sparse_query_embeddings[j].values
+        
+        # Find all indices that are in both query_indices and document_indices  
+        common_indices = set(query_indices) & set(document_indices)
+        similarity_score = 0
+        for index in common_indices:
+            # Get the weight of the token in the query and document using lookup and then multiply them
+            query_weight = query_weights[np.where(query_indices == index)[0][0]]
+            document_weight = document_weights[np.where(document_indices == index)[0][0]]
+            similarity_score  += query_weight * document_weight
+        
+        total_scores.append({
+            'document': documents[i],
+            'query': queries[j],
+            'total_score': similarity_score
+        })
+
+# Sort total_scores by 'total_score' in descending order
+sorted_scores = sorted(total_scores, key=lambda x: x['total_score'], reverse=True)
+
+# Create a table to display the sorted scores
+score_table = Table(title="Sorted Sparse Total Scores")
 score_table.add_column("Document", style="cyan")
 score_table.add_column("Query", style="magenta")
 score_table.add_column("Total Score", style="green")
