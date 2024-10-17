@@ -69,6 +69,36 @@ sparse_query_embeddings = generate_embeddings(sparse_model, queries, query=True)
 # ColBERT-specific functions
 colbert_tokenizer = Tokenizer.from_pretrained("colbert-ir/colbertv2.0")
 
+# def document_ingestion(documents: list[str]):
+#     # model.encode(*documents)
+#     return Tokenizer(documents)
+
+# def query_ingestion(queries: list[str]):
+#     return Tokenizer(queries)
+
+# document_tokens = {
+#     "hello": 1,
+#     "world": 1,
+#     "how": 1,
+#     "are": 1,
+#     "you": 1,
+# }
+
+# query_tokens = {
+#     "hello": 4.2,
+#     "hi": 3.9,
+#     "maybe": 3.6,
+#     "world": 3.6,
+#     "how": 0.4,
+#     "are": 0.05,
+#     "you": 0.2,
+# }
+
+# sum = 0
+# for token in query_tokens:
+#     sum += query_tokens[token] * document_tokens[token]
+
+# print(sum)
 
 # Print embedding shapes/lengths
 def print_embedding_info(name, doc_emb, query_emb):
