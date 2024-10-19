@@ -266,6 +266,7 @@ def vector_store_costs(
     overlap: int,
     move_index_disk: bool,
     move_vectors_disk: bool,
+    move_tokens_disk: bool,
     binary_quantization: bool,
     product_quantization: bool,
 ):
@@ -309,6 +310,12 @@ def vector_store_costs(
         disk_increase += vector_space
         latency_multiplier *= 1.2
         throughput_multiplier *= 0.8
+
+    if move_tokens_disk:
+        ram_reduction += token_space
+        disk_increase += token_space
+        latency_multiplier *= 1.1
+        throughput_multiplier *= 0.9
 
     if binary_quantization:
         # BQ means full vectors are moved to disk, binary vectors and index in RAM
@@ -444,11 +451,17 @@ def main():
 
     # Optimization Options
     st.sidebar.subheader("Optimization Options")
-    move_index_disk = st.sidebar.checkbox("Move Index to Disk", value=False)
-    move_vectors_disk = st.sidebar.checkbox("Move Vectors to Disk", value=False)
     binary_quantization = st.sidebar.checkbox("Binary Quantization", value=False)
-    product_quantization = st.sidebar.checkbox("Product Quantization", value=False)
+    product_quantization = st.sidebar.checkbox("Product Quantization", value=False, disabled=binary_quantization)
+    move_index_disk = st.sidebar.checkbox("Move Index to Disk", value=False, disabled=binary_quantization or product_quantization)
+    move_vectors_disk = st.sidebar.checkbox("Move Vectors to Disk", value=False, disabled=binary_quantization or product_quantization)
+    move_tokens_disk = st.sidebar.checkbox("Move Tokens to Disk", value=False, disabled=binary_quantization or product_quantization)
 
+    # If binary quantization is selected, set move_index_disk and move_vectors_disk to False
+    if binary_quantization or product_quantization:
+        move_index_disk = False
+        move_vectors_disk = False
+        move_tokens_disk = False
     # Add dropdown lists in the sidebar for model selection
     st.sidebar.subheader("Model Selection")
     selected_llm = st.sidebar.selectbox(
@@ -506,6 +519,7 @@ def main():
                 overlap=overlap,
                 move_index_disk=move_index_disk,
                 move_vectors_disk=move_vectors_disk,
+                move_tokens_disk=move_tokens_disk,
                 binary_quantization=binary_quantization,
                 product_quantization=product_quantization,
             )
