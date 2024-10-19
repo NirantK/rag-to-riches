@@ -286,37 +286,49 @@ def vector_store_costs(
     vector_space = (num_vectors * vector_size_bytes) * (1/2**30)  # vectors in GB
     index_space = vector_space * 0.5  # 50% overhead for the index
     # Each token is 1 byte
-    token_space = (num_tokens * 1) * (1/2**30)  # tokens in GB
+    token_space = (num_tokens * 1 * 10**6) * (1/2**30)  # tokens in GB
 
     # Default, everything in RAM
     ram_usage = vector_space + index_space + token_space
     disk_space = 0
 
+    # Calculate the effects of all optimizations combined
+    ram_reduction = 0
+    disk_increase = 0
+    latency_multiplier = 1
+    throughput_multiplier = 1
+
     if move_index_disk:
-        ram_usage -= index_space
-        disk_space += index_space
-        latency *= 1.1
-        throughput *= 0.9
+        ram_reduction += index_space
+        disk_increase += index_space
+        latency_multiplier *= 1.1
+        throughput_multiplier *= 0.9
 
     if move_vectors_disk:
-        ram_usage -= vector_space
-        disk_space += vector_space
-        latency *= 1.2
-        throughput *= 0.8
+        ram_reduction += vector_space
+        disk_increase += vector_space
+        latency_multiplier *= 1.2
+        throughput_multiplier *= 0.8
 
     if binary_quantization:
         # BQ means full vectors are moved to disk, binary vectors and index in RAM
-        ram_usage -= vector_space
-        disk_space += vector_space
-        latency *= 1.2
-        throughput *= 0.9
+        ram_reduction += (vector_space*(1/30))
+        disk_increase += vector_space
+        latency_multiplier *= 1.2
+        throughput_multiplier *= 0.9
 
     if product_quantization:
         # PQ means full vectors are moved to disk, half the vectors are stored in RAM and all of the index
-        ram_usage -= vector_space * 0.5
-        disk_space += vector_space * 0.5
-        latency *= 1.1
-        throughput *= 0.8
+        ram_reduction += vector_space * 0.5
+        disk_increase += vector_space * 0.5
+        latency_multiplier *= 1.1
+        throughput_multiplier *= 0.8
+
+    # Apply the combined effects
+    ram_usage -= ram_reduction
+    disk_space += disk_increase
+    latency *= latency_multiplier
+    throughput *= throughput_multiplier
 
     # Calculate costs
     compute_cost = instance_cost * 24 * 30
