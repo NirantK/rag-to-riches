@@ -1,6 +1,40 @@
-# Query Understanding
+# Query Understanding and Processing
 
-This is part of the [Search for RAG](../README.md) course. Here, we will be creating dynamic query decompositions, expansions, and annotations using LLMs. 
+This module focuses on techniques for understanding and processing user queries in RAG systems.
+
+## Key Topics Covered
+
+### 1. Query Analysis
+- Query intent classification
+- Entity recognition
+- Query decomposition
+- Semantic understanding
+- Query normalization
+
+### 2. Query Expansion
+- Keyword expansion
+- Semantic expansion
+- Context-aware expansion
+- Multi-query generation
+- Query reformulation strategies
+
+### 3. Query Processing
+- Preprocessing techniques
+- Query cleaning
+- Stop word handling
+- Special character processing
+- Language detection
+
+## Implementation Details
+- Query preprocessing pipelines
+- Intent classification models
+- Entity extraction tools
+- Query expansion algorithms
+- Evaluation metrics for query understanding
+
+## Resources
+- Benchmark datasets
+- Example implementations
 
 ## Dataset
 
